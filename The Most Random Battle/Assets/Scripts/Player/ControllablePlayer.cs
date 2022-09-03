@@ -4,13 +4,53 @@ using UnityEngine;
 
 public class ControllablePlayer : Player {
 
-    private void Start() {
-        int xCoord = Mathf.FloorToInt(Random.value * gridInformation.GridLength);
-        int yCoord = Mathf.FloorToInt(Random.value * gridInformation.GridHeight);
-        _coord = new Vector2Int(xCoord, yCoord);
+    private bool _isGettingDirInput;
+    private Vector2Int _direction;
 
-        Move(0, Vector2Int.zero);
-        Debug.Log(_coord);
+    private bool _isWaitingOnDiceRoll;
+
+    private void Start() {
+        Spawn();
+
+        _turn = new Turn(this);
+        _turn.StartTurn();
     }
 
+    public override void ChooseDirection() {
+        _isGettingDirInput = true;
+    }
+
+    public override void StartMovingProcess() {
+        _isWaitingOnDiceRoll = true;
+    }
+
+    public void OnDieRolled() {
+        if (_isWaitingOnDiceRoll) {
+            _isWaitingOnDiceRoll = false;
+            Move(Mathf.CeilToInt(Random.value * 6), _direction);
+            _turn.EndTurn();
+        }
+    }
+
+    private void SetDirection(Vector2Int direction) {
+        _direction = direction;
+        _isGettingDirInput = false;
+        _turn.Move();
+    }
+
+    private void Update() {
+        if (_isGettingDirInput) {
+            if (Input.GetKeyDown(KeyCode.W)) {
+                SetDirection(new Vector2Int(0, 1));
+            } else if (Input.GetKeyDown(KeyCode.A)) {
+                SetDirection(new Vector2Int(-1, 0));
+            } else if (Input.GetKeyDown(KeyCode.S)) {
+                SetDirection(new Vector2Int(0, -1));
+            } else if (Input.GetKeyDown(KeyCode.D)) {
+                SetDirection(new Vector2Int(1, 0));
+            }
+        }
+    }
+
+    
 }
