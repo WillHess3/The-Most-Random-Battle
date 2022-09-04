@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public abstract class Player : MonoBehaviour {
 
@@ -7,6 +8,12 @@ public abstract class Player : MonoBehaviour {
     public GridInformation gridInformation;
 
     protected Turn _turn;
+
+    public AnimationCurve _movementInterpolationCurve;
+    protected bool _isInMotion;
+    protected Vector3 _moveFromPosition;
+    protected Vector3 _targetPosititon;
+    protected float _moveTimer = 0.5f;
 
     protected void Spawn() {
         int xCoord = Mathf.FloorToInt(Random.value * gridInformation.GridLength);
@@ -31,7 +38,21 @@ public abstract class Player : MonoBehaviour {
             _coord.y = gridInformation.GridHeight - 1;
         }
 
-        transform.position = gridInformation.cellSize * new Vector3(_coord.x, _coord.y, 0);
+        _isInMotion = true;
+        _moveFromPosition = transform.position;
+        _targetPosititon = gridInformation.cellSize * new Vector3(_coord.x, _coord.y, 0);
+    }
+
+    protected void InMotion() {
+        if (_moveTimer > 0) {
+            _moveTimer -= Time.deltaTime;
+            transform.position = Vector3.Lerp(_moveFromPosition, _targetPosititon, _movementInterpolationCurve.Evaluate(1 - _moveTimer / 0.5f));
+        } else {
+            _isInMotion = false;
+            _moveTimer = 0.5f;
+            transform.position = _targetPosititon;
+            _turn.EndTurn();
+        }
     }
 
     public abstract void ChooseDirection();

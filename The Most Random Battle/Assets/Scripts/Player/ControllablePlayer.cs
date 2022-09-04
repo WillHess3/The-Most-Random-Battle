@@ -28,7 +28,6 @@ public class ControllablePlayer : Player {
         if (_isWaitingOnDiceRoll) {
             _isWaitingOnDiceRoll = false;
             Move(Mathf.CeilToInt(Random.value * 6), _direction);
-            _turn.EndTurn();
         }
     }
 
@@ -49,6 +48,10 @@ public class ControllablePlayer : Player {
             } else if (Input.GetKeyDown(KeyCode.D)) {
                 SetDirection(new Vector2Int(1, 0));
             }
+        }
+
+        if (_isInMotion) {
+            InMotion();
         }
     }
 
