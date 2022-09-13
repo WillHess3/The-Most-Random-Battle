@@ -4,6 +4,7 @@ using UnityEngine;
 public class Turn {
 
     private TurnState _currentTurnState;
+    public TurnState CurrentTurnState => _currentTurnState;
 
     private Player _player;
 
@@ -23,13 +24,30 @@ public class Turn {
     }
 
     public void Move() {
-        _currentTurnState = TurnState.Moving;
+        _currentTurnState = _currentTurnState == TurnState.Fleeing ? TurnState.Fleeing : TurnState.Moving;
         _player.StartMovingProcess();
     }
 
+    public void MovingComplete() {
+        if (_currentTurnState != TurnState.Fleeing) {
+            _currentTurnState = TurnState.Interacting;
+            _player.Interact();
+        } else {
+            EndTurn();
+        }
+    }
+
+    public void Flee() {
+        _currentTurnState = TurnState.Fleeing;
+        _player.Flee();
+    }
+
     public void EndTurn() {
+        _currentTurnState = TurnState.Done;
+    }
+
+    public void ConfirmTurnFinished() {
         _currentTurnState = TurnState.WaitingForTurn;
-        StartTurn();
     }
 
 }
@@ -39,5 +57,7 @@ public enum TurnState {
     ChoosingDirection,
     Moving,
     Interacting,
-    Fleeing
+    Fleeing,
+    Done,
+    Dead
 }

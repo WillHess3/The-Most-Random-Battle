@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 318aa2657eff55541959ad12b1e29152, type: 3}
+  m_Name: Shotgun
+  m_EditorClassIdentifier: 
+  weaponSprite: {fileID: 1169035348, guid: d00c45b576623874a9cdd7c46b33cb98, type: 3}
+  playerSprite: {fileID: -1558695795, guid: d00c45b576623874a9cdd7c46b33cb98, type: 3}
+  playerXOffset: 0
+  attackRadius: 4
+  damage: 2
+  chestMeanHitChance: 0.6
+  chestMeanHitChanceMaxDistance: 0.2
+  chestHitChanceStandardDeviation: 0.1
+  limbMeanHitChance: 0.4
+  limbMeanHitChanceMaxDistance: 0.05
+  limbHitChanceStandardDeviation: 0.05
+  headMeanHitChance: 0.3
+  headMeanHitChanceMaxDistance: 0.01
+  headHitChanceStandardDeviation: 0.025
+  durability: 5

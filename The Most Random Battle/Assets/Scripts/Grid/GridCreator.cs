@@ -1,10 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GridCreator : MonoBehaviour {
 
+    public static GridCreator instance;
+
     private Grid _grid;
+
+    public Grid Grid => _grid;
 
     [Header("Grid")]
     [SerializeField] private int _gridLength;
@@ -13,13 +15,20 @@ public class GridCreator : MonoBehaviour {
     public GridInformation gridInformation;
 
     [Header("Cell")]
-    [SerializeField] private Sprite _cellSprite;
+    [SerializeField] private bool _isBorders;
+
+    [SerializeField] private Sprite _cellSpriteWithoutBorder;
+    [SerializeField] private Sprite _cellSpriteWithBorder;
 
     [SerializeField] private Color _color1;
     [SerializeField] private Color _color2;
 
     private void Awake() {
-        _grid = new Grid(_gridLength, _gridHeight, _cellSprite, _color1, _color2, transform);
+        if (instance == null) {
+            instance = this;
+        }
+
+        _grid = new Grid(_gridLength, _gridHeight, _isBorders ? _cellSpriteWithBorder : _cellSpriteWithoutBorder, _color1, _color2, transform);
 
         _grid.CreateGrid();
 

@@ -3,17 +3,23 @@ using UnityEngine;
 public class Cell {
 
     private Vector2Int _coord;
+    public Vector2Int CellCoord => _coord;
+
     private const float CELL_SIZE = 2;
 
     private readonly GameObject _cellGameObject;
 
+    private CellState _cellState;
+    public CellState CellState => _cellState;
+
     public Cell(Vector2Int coord, Grid grid) {
+        _cellState = CellState.Empty;
+
         _coord = coord;
 
         _cellGameObject = new GameObject("Cell (" + _coord.x + ", " + _coord.y + ")");
         _cellGameObject.transform.parent = grid.Parent;
         _cellGameObject.transform.position = new Vector3(coord.x * CELL_SIZE, coord.y * CELL_SIZE, 0);
-        _cellGameObject.transform.localScale = 2 * Vector3.one; //temp
 
         SpriteRenderer spriteRenderer = _cellGameObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = grid.CellSprite;
@@ -27,4 +33,14 @@ public class Cell {
 
     }
 
+    public void SetCellState(CellState cellState) {
+        _cellState = cellState;
+    }
+
+}
+
+public enum CellState {
+    Empty,
+    Occupied,
+    Blocked
 }

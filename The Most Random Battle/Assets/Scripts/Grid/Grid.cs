@@ -39,4 +39,13 @@ public class Grid {
         }
     }
 
+    public Cell GetCellAtCoord(Vector2Int coord) => _cells[coord.x, coord.y];
+
+    public Vector2Int GetCellCoordFromClick(Vector3 clickPosition) {
+        Vector3 worldPoint = Camera.main.ScreenToWorldPoint(clickPosition);
+
+        Vector2Int coord = new Vector2Int(Mathf.FloorToInt((worldPoint.x + 1) / 2f), Mathf.FloorToInt((worldPoint.y + 1) / 2f));
+        return coord;
+    }
+
 }

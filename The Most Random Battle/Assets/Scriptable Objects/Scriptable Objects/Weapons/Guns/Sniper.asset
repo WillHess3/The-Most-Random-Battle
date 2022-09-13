@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 318aa2657eff55541959ad12b1e29152, type: 3}
+  m_Name: Sniper
+  m_EditorClassIdentifier: 
+  weaponSprite: {fileID: -188109401, guid: d00c45b576623874a9cdd7c46b33cb98, type: 3}
+  playerSprite: {fileID: -941318910, guid: d00c45b576623874a9cdd7c46b33cb98, type: 3}
+  playerXOffset: 0
+  attackRadius: 8
+  damage: 1
+  chestMeanHitChance: 0.9
+  chestMeanHitChanceMaxDistance: 0.6
+  chestHitChanceStandardDeviation: 0.025
+  limbMeanHitChance: 0.8
+  limbMeanHitChanceMaxDistance: 0.5
+  limbHitChanceStandardDeviation: 0.05
+  headMeanHitChance: 0.5
+  headMeanHitChanceMaxDistance: 0.3
+  headHitChanceStandardDeviation: 0.05
+  durability: 5
