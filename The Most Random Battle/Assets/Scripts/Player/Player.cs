@@ -73,6 +73,7 @@ public abstract class Player : MonoBehaviour {
         transform.position = gridInformation.cellSize * new Vector3(_coord.x, _coord.y, 0);
 
         GridCreator.instance.Grid.GetCellAtCoord(_coord).SetCellState(CellState.Blocked);
+        GridCreator.instance.Grid.GetCellAtCoord(_coord).player = this;
 
         gameManager.PlayerReady();
     }
@@ -110,14 +111,24 @@ public abstract class Player : MonoBehaviour {
             }
         }
 
+        //checks path for a pickupable objcet
+        foreach (Vector2Int coord in coordinatePath) {
+            Cell cell = GridCreator.instance.Grid.GetCellAtCoord(coord);
+            if (cell.CellState == CellState.Occupied) {
+                Debug.Log(cell.pickupableObject);
+            }
+        }
+
         //sets new coord
         GridCreator.instance.Grid.GetCellAtCoord(_coord).SetCellState(CellState.Empty);
+        GridCreator.instance.Grid.GetCellAtCoord(_coord).player = null;
 
         if (coordinatePath.Count > 0) {
             _coord = coordinatePath[coordinatePath.Count - 1];
         }
 
         GridCreator.instance.Grid.GetCellAtCoord(_coord).SetCellState(CellState.Blocked);
+        GridCreator.instance.Grid.GetCellAtCoord(_coord).player = this;
 
         //moves player
         _isInMotion = true;
@@ -137,10 +148,10 @@ public abstract class Player : MonoBehaviour {
         }
     }
 
-    protected bool IsInteractingPossible(float range) {
+    protected bool IsInteractingPossible(int radius) {
         _interactableCells.Clear();
 
-        foreach (Player player in gameManager.Players) {
+        /*foreach (Player player in gameManager.Players) {
             if (player == this) {
                 continue;
             }
@@ -153,6 +164,32 @@ public abstract class Player : MonoBehaviour {
         foreach (Chest chest in gameManager.Chests) {
             if ((chest.Coord - _coord).sqrMagnitude == 1) {
                 _interactableCells.Add(GridCreator.instance.Grid.GetCellAtCoord(chest.Coord));
+            }
+        }*/
+
+        for (int y = _coord.y - radius; y <= _coord.y + radius; y++) {
+            for (int x = _coord.x - radius; x <= _coord.x + radius; x++) {
+                if (x < 0 || x > GridCreator.instance.gridInformation.GridLength - 1 || y < 0 || y > GridCreator.instance.gridInformation.GridHeight - 1) {
+                    continue;
+                }
+
+                Cell cell = GridCreator.instance.Grid.GetCellAtCoord(new Vector2Int(x, y));
+
+                if (cell.player == this) {
+                    continue;
+                }
+
+                if ((cell.CellCoord - _coord).sqrMagnitude <= radius * radius && cell.CellState == CellState.Blocked) {
+                    Debug.Log("cum");
+                    //something on the cell
+                    if (cell.chest != null) {
+                        if ((cell.CellCoord - _coord).sqrMagnitude == 1) {
+                            _interactableCells.Add(cell);
+                        }
+                    } else if (cell.player != null) {
+                        _interactableCells.Add(cell);
+                    }
+                }
             }
         }
 

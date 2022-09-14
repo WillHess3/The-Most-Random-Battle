@@ -161,7 +161,7 @@ MonoBehaviour:
   _aiPlayerPrefab: {fileID: 1821691464839730373, guid: 90c6cceb9a5b281418c3b060a752e76f, type: 3}
   _powerUpChestPrefab: {fileID: 8362567144359610186, guid: bbb20135c2e2d7f4eb6d8956e716ceac, type: 3}
   _weaponChestPrefab: {fileID: 2088467959176617016, guid: c0e13fe616e7edb46bdecba7e5433e17, type: 3}
-  _pickupablePrefab: {fileID: 0}
+  _pickupablePrefab: {fileID: 8241857085263489188, guid: 31fe37d641625154cafe2b86973a5a3d, type: 3}
 --- !u!4 &527815331
 Transform:
   m_ObjectHideFlags: 0

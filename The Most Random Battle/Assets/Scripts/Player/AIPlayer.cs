@@ -77,8 +77,8 @@ public class AIPlayer : Player {
 
     public override void Interact() {
         //check if interacting is possible
-        if (IsInteractingPossible(_playerWeaponManager.EquipedWeapon.attackRadius)) {
-            //Get the player to attack
+        if (IsInteractingPossible((int)_playerWeaponManager.EquipedWeapon.attackRadius)) {
+            /*//Get the player to attack
             foreach (Player player in gameManager.Players) {
                 if (player != this && player.Turn.CurrentTurnState != TurnState.Dead) {
                     if (player.Coord == _interactableCells[0].CellCoord) {
@@ -97,8 +97,24 @@ public class AIPlayer : Player {
                     _turn.Flee();
                     return;
                 }
-            }
+            }*/
 
+            //pick which cell to interact with
+            Cell selectedCell = _interactableCells[0];
+
+            if (selectedCell.player != null && selectedCell.player != this) {
+                //interact
+                Debug.Log("attacked player");
+
+                //flee
+                _turn.Flee();
+            } else if (selectedCell.chest != null) {
+                //open chest
+                selectedCell.chest.OpenChest();
+
+                //flee
+                _turn.Flee();
+            }
         } else {
             _turn.EndTurn();
         }

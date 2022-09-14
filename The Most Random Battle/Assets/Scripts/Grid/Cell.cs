@@ -12,6 +12,10 @@ public class Cell {
     private CellState _cellState;
     public CellState CellState => _cellState;
 
+    public Pickupable pickupableObject;
+    public Player player;
+    public Chest chest;
+
     public Cell(Vector2Int coord, Grid grid) {
         _cellState = CellState.Empty;
 

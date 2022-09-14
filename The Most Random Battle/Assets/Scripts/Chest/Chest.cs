@@ -82,6 +82,7 @@ public class Chest : MonoBehaviour {
         } else {
             _coord = randCoord;
             GridCreator.instance.Grid.GetCellAtCoord(randCoord).SetCellState(CellState.Blocked);
+            GridCreator.instance.Grid.GetCellAtCoord(randCoord).chest = this;
             transform.position = GridCreator.instance.gridInformation.cellSize * new Vector3(_coord.x, _coord.y, 0);
         }
     }
@@ -94,10 +95,12 @@ public class Chest : MonoBehaviour {
 
         //unblock tile
         GridCreator.instance.Grid.GetCellAtCoord(_coord).SetCellState(CellState.Occupied);
+        GridCreator.instance.Grid.GetCellAtCoord(_coord).chest = null;
 
         //spawn reward
         GameObject pickupableObject = Instantiate(pickupablePrefab, GridCreator.instance.gridInformation.cellSize * new Vector3(_coord.x, _coord.y, 0), Quaternion.identity);
         pickupableObject.GetComponent<Pickupable>().SetType(_itemDistribution.RandomFromDistribution());
+        pickupableObject.GetComponent<Pickupable>().SetCoord(_coord);
     }
 
     public void SetCoord(Vector2Int coord) {

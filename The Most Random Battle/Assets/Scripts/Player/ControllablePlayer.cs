@@ -45,7 +45,7 @@ public class ControllablePlayer : Player {
 
     public override void Interact() {
         //check if interacting is possible
-        if (IsInteractingPossible(_playerWeaponManager.EquipedWeapon.attackRadius)) {
+        if (IsInteractingPossible((int)_playerWeaponManager.EquipedWeapon.attackRadius)) {
             //Get cell to interact with
             _isWaitingOnInteractableTileSelect = true;
         } else {
@@ -87,7 +87,7 @@ public class ControllablePlayer : Player {
 
                 if (selectedCell.CellState == CellState.Blocked && _interactableCells.Contains(selectedCell)) {
                     //find out whats on the cell
-                    foreach (Player player in gameManager.Players) {
+                    /*foreach (Player player in gameManager.Players) {
                         if (player != this && player.Turn.CurrentTurnState != TurnState.Dead) {
                             if (player.Coord == selectedCell.CellCoord) {
                                 //interact
@@ -98,16 +98,31 @@ public class ControllablePlayer : Player {
                                 _turn.Flee();
                             }
                         }
-                    }
+                    }*/
 
                     //Get chest to open
-                    foreach (Chest chest in gameManager.Chests) {
+                    /*foreach (Chest chest in gameManager.Chests) {
                         if (chest.Coord == _interactableCells[0].CellCoord) {
                             //open chest
                             chest.OpenChest();
                             _turn.Flee();
                             return;
                         }
+                    }*/
+
+                    if (selectedCell.player != null && selectedCell.player != this) {
+                        //interact
+                        Debug.Log("attacked player");
+                        _isWaitingOnInteractableTileSelect = false;
+
+                        //flee
+                        _turn.Flee();
+                    } else if (selectedCell.chest != null) {
+                        //open chest
+                        selectedCell.chest.OpenChest();
+
+                        //flee
+                        _turn.Flee();
                     }
                 } else {
                     _turn.EndTurn();

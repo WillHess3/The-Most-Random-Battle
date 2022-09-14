@@ -13,6 +13,8 @@ public class Pickupable : MonoBehaviour {
 
     public PickupableTypeEnum PickupableType => _pickupableType;
 
+    private Vector2Int _coord;
+
     private void Awake() {
         _spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -41,6 +43,11 @@ public class Pickupable : MonoBehaviour {
         _pickupableType = pickupableType;
 
         _spriteRenderer.sprite = _pickupableSpritesDictionary[_pickupableType];
+    }
+
+    public void SetCoord(Vector2Int coord) {
+        _coord = coord;
+        GridCreator.instance.Grid.GetCellAtCoord(_coord).pickupableObject = this;
     }
 }
 
