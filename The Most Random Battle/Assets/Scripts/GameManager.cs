@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour {
     private int _numberOfReadyPlayers = 0;
 
     private List<Chest> _chests;
+    public List<Chest> Chests => _chests;
 
     private bool _isRoundInProgress;
 
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour {
     [Space]
     [SerializeField] private GameObject _powerUpChestPrefab;
     [SerializeField] private GameObject _weaponChestPrefab;
+    [SerializeField] private GameObject _pickupablePrefab;
 
     public static event Action<Player> SwitchCameraTarget;
 
@@ -48,13 +50,11 @@ public class GameManager : MonoBehaviour {
         //set up chests
         _chests = new List<Chest>();
         for (int i = 0; i < _numberOfPowerUpChests; i++) {
-            GameObject chest = Instantiate(_powerUpChestPrefab);
-            _chests.Add(chest.GetComponent<Chest>());
+            MakeChest(_powerUpChestPrefab, false);
         }
 
-        for (int i = 0; i < _numberOfPowerUpChests; i++) {
-            GameObject chest = Instantiate(_weaponChestPrefab);
-            _chests.Add(chest.GetComponent<Chest>());
+        for (int i = 0; i < _numberOfWeaponChests; i++) {
+            MakeChest(_weaponChestPrefab, true);
         }
 
         //set up players
@@ -67,18 +67,29 @@ public class GameManager : MonoBehaviour {
 
                 GameObject player = Instantiate(_controllablePlayerPrefab);
                 _players[i] = player.GetComponent<ControllablePlayer>();
-                _players[i].GameManager = this;
+                _players[i].gameManager = this;
             } else {
                 GameObject player = Instantiate(_aiPlayerPrefab);
                 _players[i] = player.GetComponent<AIPlayer>();
-                _players[i].GameManager = this;
+                _players[i].gameManager = this;
             }
         }
 
         ShufflePlayerArray();
     }
 
-    public void ShufflePlayerArray() {
+    private void MakeChest(GameObject prefab, bool isWeaponChest) {
+        GameObject chest = Instantiate(prefab);
+        Chest chestComponent = chest.GetComponent<Chest>();
+
+        chestComponent.gameManager = this;
+        chestComponent.pickupablePrefab = _pickupablePrefab;
+        chestComponent.isWeaponChest = isWeaponChest;
+
+        _chests.Add(chest.GetComponent<Chest>());
+    }
+
+    private void ShufflePlayerArray() {
         Player tempPlayer;
 
         for (int i = 0; i < _players.Length; i++) {

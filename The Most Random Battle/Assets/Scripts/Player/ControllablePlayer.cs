@@ -87,7 +87,7 @@ public class ControllablePlayer : Player {
 
                 if (selectedCell.CellState == CellState.Blocked && _interactableCells.Contains(selectedCell)) {
                     //find out whats on the cell
-                    foreach (Player player in GameManager.Players) {
+                    foreach (Player player in gameManager.Players) {
                         if (player != this && player.Turn.CurrentTurnState != TurnState.Dead) {
                             if (player.Coord == selectedCell.CellCoord) {
                                 //interact
@@ -97,6 +97,16 @@ public class ControllablePlayer : Player {
                                 //flee
                                 _turn.Flee();
                             }
+                        }
+                    }
+
+                    //Get chest to open
+                    foreach (Chest chest in gameManager.Chests) {
+                        if (chest.Coord == _interactableCells[0].CellCoord) {
+                            //open chest
+                            chest.OpenChest();
+                            _turn.Flee();
+                            return;
                         }
                     }
                 } else {

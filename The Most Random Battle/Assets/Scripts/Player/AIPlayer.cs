@@ -24,7 +24,7 @@ public class AIPlayer : Player {
             //get targeted player
             float closestSquaredDist = float.MaxValue;
             Player closestPlayer = null;
-            foreach (Player player in GameManager.Players) {
+            foreach (Player player in gameManager.Players) {
                 if (player == this || player.Turn.CurrentTurnState == TurnState.Dead) {
                     continue;
                 }
@@ -77,15 +77,25 @@ public class AIPlayer : Player {
 
     public override void Interact() {
         //check if interacting is possible
-        if (IsInteractingPossible(1)) {
+        if (IsInteractingPossible(_playerWeaponManager.EquipedWeapon.attackRadius)) {
             //Get the player to attack
-            foreach (Player player in GameManager.Players) {
+            foreach (Player player in gameManager.Players) {
                 if (player != this && player.Turn.CurrentTurnState != TurnState.Dead) {
                     if (player.Coord == _interactableCells[0].CellCoord) {
                         //attack player
                         _turn.Flee();
                         return;
                     }
+                }
+            }
+
+            //Get chest to open
+            foreach (Chest chest in gameManager.Chests) {
+                if (chest.Coord == _interactableCells[0].CellCoord) {
+                    //open chest
+                    chest.OpenChest();
+                    _turn.Flee();
+                    return;
                 }
             }
 

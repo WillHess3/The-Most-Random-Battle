@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public abstract class Player : MonoBehaviour {
 
-    public GameManager GameManager;
+    public GameManager gameManager;
     
     protected Vector2Int _coord;
     public Vector2Int Coord => _coord;
@@ -47,11 +47,11 @@ public abstract class Player : MonoBehaviour {
         void PickColor() {
             int randIndex = Mathf.FloorToInt(Random.value * _playerColors.Colors.Count);
 
-            if (GameManager.UnavailableColorIndecies.Contains(randIndex)) {
+            if (gameManager.UnavailableColorIndecies.Contains(randIndex)) {
                 PickColor();
             } else {
                 _colorIndex = randIndex;
-                GameManager.SetUnavailableColor(_colorIndex);
+                gameManager.SetUnavailableColor(_colorIndex);
             }
         }
 
@@ -74,7 +74,7 @@ public abstract class Player : MonoBehaviour {
 
         GridCreator.instance.Grid.GetCellAtCoord(_coord).SetCellState(CellState.Blocked);
 
-        GameManager.PlayerReady();
+        gameManager.PlayerReady();
     }
     
     public void Move(int moveAmount, Vector2Int direction) {
@@ -140,13 +140,19 @@ public abstract class Player : MonoBehaviour {
     protected bool IsInteractingPossible(float range) {
         _interactableCells.Clear();
 
-        foreach (Player player in GameManager.Players) {
+        foreach (Player player in gameManager.Players) {
             if (player == this) {
                 continue;
             }
 
             if (Mathf.Pow(player.Coord.x - _coord.x, 2) + Mathf.Pow(player.Coord.y - _coord.y, 2) <= range * range) {
                 _interactableCells.Add(GridCreator.instance.Grid.GetCellAtCoord(player.Coord));
+            }
+        }
+
+        foreach (Chest chest in gameManager.Chests) {
+            if ((chest.Coord - _coord).sqrMagnitude == 1) {
+                _interactableCells.Add(GridCreator.instance.Grid.GetCellAtCoord(chest.Coord));
             }
         }
 
