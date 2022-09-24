@@ -97,7 +97,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d200d908b75f2341a329e5167772793, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GameManager: {fileID: 0}
+  gameManager: {fileID: 0}
   gridInformation: {fileID: 11400000, guid: a5b29584aceccef428cab6c326b8784f, type: 2}
   movementInterpolationCurve:
     serializedVersion: 2
@@ -125,3 +125,4 @@ MonoBehaviour:
     m_RotationOrder: 4
   _playerColors: {fileID: 11400000, guid: 87f055e9e5dccb7468e111fb0e589fb2, type: 2}
   _weaponsList: {fileID: 11400000, guid: a49b6efa25d410f4a851710435e4da92, type: 2}
+  startingKnifePrefab: {fileID: 961889217724159909, guid: 8ed97762f52555743a4780383c35fcf1, type: 3}

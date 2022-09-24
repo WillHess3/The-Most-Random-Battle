@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -31,6 +32,11 @@ public abstract class Player : MonoBehaviour {
 
     [SerializeField] protected WeaponsList _weaponsList;
     protected PlayerWeaponManager _playerWeaponManager;
+    public PlayerWeaponManager PlayerWeaponManager => _playerWeaponManager;
+
+    public GameObject startingKnifePrefab;
+    private Weapon _startingKnifeWeapon;
+    public Weapon StartingKnifeWeapon => _startingKnifeWeapon;
 
     protected int _health;
     protected bool _isArmsCrippled;
@@ -38,14 +44,29 @@ public abstract class Player : MonoBehaviour {
 
     protected SpriteRenderer _spriteRenderer;
 
+    public static Action<Player, GameObject, int> PickedUpWeapon;
+    public static Action<Player> PickedUpWeaponVisualEvent;
+
+    private bool _isReadyToPickUpWeapon;
+    private int _inventorySpot;
+    protected Pickupable _pickupableObject;
+    private Vector2Int _pickupableCellCoord;
+    protected bool _isStopAtWeapon;
+    protected bool _isCurrentlyStoppedAtWeapon;
+
     protected void Spawn() {
-        _playerWeaponManager = new PlayerWeaponManager(this, _weaponsList);
+        _startingKnifeWeapon = Instantiate(startingKnifePrefab).GetComponent<Weapon>();
+        
+        _playerWeaponManager = new PlayerWeaponManager(this);
         _spriteRenderer = GetComponent<SpriteRenderer>();
 
-        _spriteRenderer.sprite = _playerWeaponManager.EquipedWeapon.playerSprite;
+        PickedUpWeapon?.Invoke(this, _startingKnifeWeapon.gameObject, 0);
+        _playerWeaponManager.EquipedWeapon.GetComponent<Pickupable>().SetType(PickupableTypeEnum.Knife);
+
+        _spriteRenderer.sprite = _playerWeaponManager.EquipedWeapon.WeaponScriptableObject.playerSprite;
 
         void PickColor() {
-            int randIndex = Mathf.FloorToInt(Random.value * _playerColors.Colors.Count);
+            int randIndex = Mathf.FloorToInt(UnityEngine.Random.value * _playerColors.Colors.Count);
 
             if (gameManager.UnavailableColorIndecies.Contains(randIndex)) {
                 PickColor();
@@ -59,8 +80,8 @@ public abstract class Player : MonoBehaviour {
         GetComponent<SpriteRenderer>().material.color = _playerColors.Colors[_colorIndex];
 
         void PickCoords() {
-            int xCoord = Mathf.FloorToInt(Random.value * gridInformation.GridLength);
-            int yCoord = Mathf.FloorToInt(Random.value * gridInformation.GridHeight);
+            int xCoord = Mathf.FloorToInt(UnityEngine.Random.value * gridInformation.GridLength);
+            int yCoord = Mathf.FloorToInt(UnityEngine.Random.value * gridInformation.GridHeight);
             _coord = new Vector2Int(xCoord, yCoord);
 
             if (GridCreator.instance.Grid.GetCellAtCoord(_coord).CellState != CellState.Empty) {
@@ -115,7 +136,45 @@ public abstract class Player : MonoBehaviour {
         foreach (Vector2Int coord in coordinatePath) {
             Cell cell = GridCreator.instance.Grid.GetCellAtCoord(coord);
             if (cell.CellState == CellState.Occupied) {
-                Debug.Log(cell.pickupableObject);
+                Pickupable pickupableObject = cell.pickupableObject;
+                _pickupableCellCoord = coord;
+
+                //resets cell
+                cell.SetCellState(CellState.Empty);
+                
+                //check if its a weapon
+                if (pickupableObject.IsWeapon) {
+                    //check if inventory is open
+                    bool isWeaponSpotOpen = false;
+                    int inventorySpot = 0;
+                    for (int i = 0; i < _playerWeaponManager.Inventory.Length; i++) {
+                        if (_playerWeaponManager.Inventory[i] == null) {
+                            isWeaponSpotOpen = true;
+                            inventorySpot = i;
+                            break;
+                        }
+                    }
+
+                    _pickupableObject = pickupableObject;
+                    
+                    if (isWeaponSpotOpen) {
+                        //Pick up weapon
+                        _isReadyToPickUpWeapon = true;
+                        _inventorySpot = inventorySpot;
+
+                        PickedUpWeapon?.Invoke(this, _pickupableObject.gameObject, _inventorySpot);
+                    } else {
+                        //replace weapon
+                        _isStopAtWeapon = true;
+                    }
+
+                } else {
+                    //check if we have a power up
+
+                    //equip power up
+
+                    //replace power up
+                }
             }
         }
 
@@ -138,8 +197,31 @@ public abstract class Player : MonoBehaviour {
 
     protected void InMotion() {
         if (_moveTimer > 0) {
-            _moveTimer -= Time.deltaTime;
-            transform.position = Vector3.Lerp(_moveFromPosition, _targetPosititon, movementInterpolationCurve.Evaluate(1 - _moveTimer / 0.5f));
+            if (!_isCurrentlyStoppedAtWeapon) {
+                _moveTimer -= Time.deltaTime;
+                transform.position = Vector3.Lerp(_moveFromPosition, _targetPosititon, movementInterpolationCurve.Evaluate(1 - _moveTimer / 0.5f));
+            }
+                
+            if (!_isStopAtWeapon) {
+                if (_isReadyToPickUpWeapon) {
+                    if (new Vector2Int(Mathf.FloorToInt((transform.position.x + 1) / 2f), Mathf.FloorToInt((transform.position.y + 1) / 2f)) == _pickupableCellCoord){
+                        _isReadyToPickUpWeapon = false;
+                        PickedUpWeaponVisualEvent?.Invoke(this);
+                    }
+                }
+            } else {
+                if (!_isCurrentlyStoppedAtWeapon) {
+                    Vector2Int coord = new Vector2Int(Mathf.FloorToInt((transform.position.x + 1) / 2f), Mathf.FloorToInt((transform.position.y + 1) / 2f));
+
+                    if (coord != _pickupableCellCoord) {
+                        _moveTimer -= Time.deltaTime;
+                        transform.position = Vector3.Lerp(_moveFromPosition, _targetPosititon, movementInterpolationCurve.Evaluate(1 - _moveTimer / 0.5f));
+                    } else {
+                        ReplaceWeapon();
+                        _isCurrentlyStoppedAtWeapon = true;
+                    }
+                }
+            }
         } else {
             _isInMotion = false;
             _moveTimer = 0.5f;
@@ -180,7 +262,6 @@ public abstract class Player : MonoBehaviour {
                 }
 
                 if ((cell.CellCoord - _coord).sqrMagnitude <= radius * radius && cell.CellState == CellState.Blocked) {
-                    Debug.Log("cum");
                     //something on the cell
                     if (cell.chest != null) {
                         if ((cell.CellCoord - _coord).sqrMagnitude == 1) {
@@ -200,6 +281,7 @@ public abstract class Player : MonoBehaviour {
     public abstract void StartMovingProcess();
     public abstract void Interact();
     public abstract void Flee();
+    public abstract void ReplaceWeapon();
 
     public void TakeDamage(int damage) {
         _health -= damage;
@@ -212,4 +294,6 @@ public abstract class Player : MonoBehaviour {
             _isLegsCrippled = true;
         }
     }
+
+
 }

@@ -3,64 +3,33 @@ using UnityEngine;
 
 public class PlayerWeaponManager {
 
-    private readonly WeaponsList _weaponList;
-    private Weapons[] _inventory;
-    private Weapons _equipedWeapon;
+    private Weapon[] _inventory;
+    private Weapon _equipedWeapon;
 
-    public Weapons EquipedWeapon => _equipedWeapon;
+    public Weapon EquipedWeapon => _equipedWeapon;
+    public Weapon[] Inventory => _inventory;
 
     private Player _player;
 
-    private float _headHitChance;
-    private float _chestHitChance;
-    private float _armsHitChance;
-    private float _legsHitChance;
-
-    public PlayerWeaponManager(Player player, WeaponsList weaponsList) {
-        _weaponList = weaponsList;
+    public PlayerWeaponManager(Player player) {
         _player = player;
 
-        _inventory = new Weapons[2];
+        _inventory = new Weapon[2];
 
-        _equipedWeapon = weaponsList.Weapons[0];
+        _equipedWeapon = _player.StartingKnifeWeapon;
         _inventory[0] = _equipedWeapon;
     }
 
-    public List<Vector2Int> AttackableCellCoords() {
-        List<Vector2Int> attackableCellCoords = new List<Vector2Int>();
-
-        for (int y = (int)(_player.Coord.y - _equipedWeapon.attackRadius); y < (int)(_player.Coord.y + _equipedWeapon.attackRadius); y++) {
-            for (int x = (int)(_player.Coord.x - _equipedWeapon.attackRadius); x < (int)(_player.Coord.x + _equipedWeapon.attackRadius); x++) {
-                if (x * x + y * y <= _equipedWeapon.attackRadius * _equipedWeapon.attackRadius) {
-                    if (x == _player.Coord.x && y == _player.Coord.y) {
-                        continue;
-                    }
-
-                    attackableCellCoords.Add(new Vector2Int(x, y));
-                }
-            }
-        }
-
-        return attackableCellCoords;
+    public void Equip(int weaponIndex) {
+        _equipedWeapon = _inventory[weaponIndex];
     }
 
-    public void GenerateHitChances(Vector2Int targetCoord) {
-        float headMeanHitChance = _equipedWeapon.headMeanHitChance;
-        float limbMeanHitChance = _equipedWeapon.limbMeanHitChance;
-        float chestMeanHitChance = _equipedWeapon.chestMeanHitChance;
+    public void PickUpWeapon(Weapon weapon, int inventorySpot) {
+        _inventory[inventorySpot] = weapon;
+    }
 
-        if (!_equipedWeapon.isMelee) {
-            float distance = (targetCoord - _player.Coord).magnitude;
-
-            headMeanHitChance = Mathf.Lerp(_equipedWeapon.headMeanHitChance, _equipedWeapon.headMeanHitChanceMaxDistance, distance / _equipedWeapon.attackRadius);
-            limbMeanHitChance = Mathf.Lerp(_equipedWeapon.limbMeanHitChance, _equipedWeapon.limbMeanHitChanceMaxDistance, distance / _equipedWeapon.attackRadius);
-            chestMeanHitChance = Mathf.Lerp(_equipedWeapon.chestMeanHitChance, _equipedWeapon.chestMeanHitChanceMaxDistance, distance / _equipedWeapon.attackRadius);
-        }
-
-        _headHitChance = Mathf.Clamp01(NormalDistribution.RandomOverNormalDistribution(headMeanHitChance, _equipedWeapon.headHitChanceStandardDeviation));
-        _chestHitChance = Mathf.Clamp01(NormalDistribution.RandomOverNormalDistribution(chestMeanHitChance, _equipedWeapon.chestHitChanceStandardDeviation));
-        _armsHitChance = Mathf.Clamp01(NormalDistribution.RandomOverNormalDistribution(limbMeanHitChance, _equipedWeapon.limbHitChanceStandardDeviation));
-        _legsHitChance = Mathf.Clamp01(NormalDistribution.RandomOverNormalDistribution(limbMeanHitChance, _equipedWeapon.limbHitChanceStandardDeviation));
+    public void DropWeapon(int inventorySpot) {
+        _inventory[inventorySpot] = null;
     }
 
     //Attack
@@ -70,27 +39,27 @@ public class PlayerWeaponManager {
 
         switch (targetedLimb) {
             case Limbs.Chest:
-                if (randomHitChance >= _chestHitChance) {
-                    target.TakeDamage(_equipedWeapon.damage);
+                if (randomHitChance >= _equipedWeapon.WeaponHitChances.chestHitChance) {
+                    target.TakeDamage(_equipedWeapon.WeaponScriptableObject.damage);
                     isHit = true;
                 }
 
                 break;
 
             case Limbs.Head:
-                if (randomHitChance >= _headHitChance) {
-                    target.TakeDamage(5);
+                if (randomHitChance >= _equipedWeapon.WeaponHitChances.headHitChance) {
+                    target.TakeDamage(3);
                     isHit = true;
                 }
 
                 break;
 
             case Limbs.Arms:
-                if (randomHitChance >= _armsHitChance) {
+                if (randomHitChance >= _equipedWeapon.WeaponHitChances.armsHitChance) {
                     target.CrippleLimb(true);
 
                     if (Random.value < .5f) {
-                        target.TakeDamage(_equipedWeapon.damage);
+                        target.TakeDamage(_equipedWeapon.WeaponScriptableObject.damage);
                     }
 
                     isHit = true;
@@ -99,11 +68,11 @@ public class PlayerWeaponManager {
                 break;
 
             case Limbs.Legs:
-                if (randomHitChance >= _legsHitChance) {
+                if (randomHitChance >= _equipedWeapon.WeaponHitChances.legsHitChance) {
                     target.CrippleLimb(false);
 
                     if (Random.value < .5f) {
-                        target.TakeDamage(_equipedWeapon.damage);
+                        target.TakeDamage(_equipedWeapon.WeaponScriptableObject.damage);
                     }
 
                     isHit = true;
@@ -112,8 +81,8 @@ public class PlayerWeaponManager {
                 break;
         }
 
-        if (!_equipedWeapon.isMelee || (_equipedWeapon.isMelee && isHit)) {
-            _equipedWeapon.durability--;
+        if (!_equipedWeapon.WeaponScriptableObject.isMelee || (_equipedWeapon.WeaponScriptableObject.isMelee && isHit)) {
+            _equipedWeapon.TakeWeaponDamage();
         }
     }
 }

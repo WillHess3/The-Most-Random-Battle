@@ -77,7 +77,7 @@ public class AIPlayer : Player {
 
     public override void Interact() {
         //check if interacting is possible
-        if (IsInteractingPossible((int)_playerWeaponManager.EquipedWeapon.attackRadius)) {
+        if (IsInteractingPossible((int)_playerWeaponManager.EquipedWeapon.WeaponScriptableObject.attackRadius)) {
             /*//Get the player to attack
             foreach (Player player in gameManager.Players) {
                 if (player != this && player.Turn.CurrentTurnState != TurnState.Dead) {
@@ -122,6 +122,10 @@ public class AIPlayer : Player {
 
     public override void Flee() {
         ChooseDirection();
+    }
+
+    public override void ReplaceWeapon() {
+        throw new System.NotImplementedException();
     }
 
     private void Update() {

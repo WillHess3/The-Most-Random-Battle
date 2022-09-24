@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class ControllablePlayer : Player {
 
@@ -8,6 +9,9 @@ public class ControllablePlayer : Player {
     private bool _isWaitingOnDiceRoll;
 
     private bool _isWaitingOnInteractableTileSelect;
+
+    public static event Action<Player> ReplaceWeaponStart;
+    private bool _acceptingReplacementInput;
 
     private void Start() {
         _isControllablePlayer = true;
@@ -19,11 +23,12 @@ public class ControllablePlayer : Player {
         _interactableCells = new List<Cell>();
 
         DieRoller.RollDie += OnDieRolled;
+
+        WeaopnPowerUpDisplayer.ReplaceInputRecieved += OnWeaponReplaceButtonPressed;
     }
 
     public override void ChooseDirection() {
         _isGettingDirInput = true;
-        Debug.Log("accepting Input");
     }
 
     private void SetDirection(Vector2Int direction) {
@@ -45,7 +50,7 @@ public class ControllablePlayer : Player {
 
     public override void Interact() {
         //check if interacting is possible
-        if (IsInteractingPossible((int)_playerWeaponManager.EquipedWeapon.attackRadius)) {
+        if (IsInteractingPossible((int)_playerWeaponManager.EquipedWeapon.WeaponScriptableObject.attackRadius)) {
             //Get cell to interact with
             _isWaitingOnInteractableTileSelect = true;
         } else {
@@ -55,6 +60,24 @@ public class ControllablePlayer : Player {
 
     public override void Flee() {
         ChooseDirection();
+    }
+
+    public override void ReplaceWeapon() {
+        _acceptingReplacementInput = true;
+        ReplaceWeaponStart?.Invoke(this);
+    }
+
+    private void OnWeaponReplaceButtonPressed(Player player, int replaceIndex) {
+        if (!_acceptingReplacementInput || player != this) {
+            return;
+        }
+
+        _playerWeaponManager.Inventory[replaceIndex].Drop(_pickupableObject.Coord);
+        PickedUpWeapon?.Invoke(this, _pickupableObject.gameObject, replaceIndex);
+        PickedUpWeaponVisualEvent?.Invoke(this);
+
+        _isStopAtWeapon = false;
+        _isCurrentlyStoppedAtWeapon = false;
     }
 
     private void Update() {
@@ -120,6 +143,7 @@ public class ControllablePlayer : Player {
                     } else if (selectedCell.chest != null) {
                         //open chest
                         selectedCell.chest.OpenChest();
+                        _isWaitingOnInteractableTileSelect = false;
 
                         //flee
                         _turn.Flee();
@@ -133,5 +157,6 @@ public class ControllablePlayer : Player {
 
     private void OnDestroy() {
         DieRoller.RollDie -= OnDieRolled;
+        WeaopnPowerUpDisplayer.ReplaceInputRecieved -= OnWeaponReplaceButtonPressed;
     }
 }

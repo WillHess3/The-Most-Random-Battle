@@ -5,7 +5,10 @@ using UnityEngine;
 public class Pickupable : MonoBehaviour {
 
     [SerializeField] private List<Sprite> _sprites;
-    private Dictionary<PickupableTypeEnum, Sprite> _pickupableSpritesDictionary;
+    private readonly Dictionary<PickupableTypeEnum, Sprite> _pickupableSpritesDictionary = new Dictionary<PickupableTypeEnum, Sprite>();
+
+    public List<Sprite> Sprites => _sprites;
+    public Dictionary<PickupableTypeEnum, Sprite> PickupableSpritesDictionary => _pickupableSpritesDictionary;
 
     private SpriteRenderer _spriteRenderer;
 
@@ -14,13 +17,17 @@ public class Pickupable : MonoBehaviour {
     public PickupableTypeEnum PickupableType => _pickupableType;
 
     private Vector2Int _coord;
+    public Vector2Int Coord => _coord;
+
+    private bool _isWeapon;
+    public bool IsWeapon => _isWeapon;
+
+    public WeaponsList weaponsList;
 
     private void Awake() {
         _spriteRenderer = GetComponent<SpriteRenderer>();
 
         //populates dictionary
-        _pickupableSpritesDictionary = new Dictionary<PickupableTypeEnum, Sprite>();
-
         _pickupableSpritesDictionary.Add(PickupableTypeEnum.Knife, _sprites[0]);
         _pickupableSpritesDictionary.Add(PickupableTypeEnum.Chainsaw, _sprites[1]);
         _pickupableSpritesDictionary.Add(PickupableTypeEnum.Hammer, _sprites[2]);
@@ -43,6 +50,8 @@ public class Pickupable : MonoBehaviour {
         _pickupableType = pickupableType;
 
         _spriteRenderer.sprite = _pickupableSpritesDictionary[_pickupableType];
+
+        _isWeapon = _sprites.IndexOf(_pickupableSpritesDictionary[_pickupableType]) < 10;
     }
 
     public void SetCoord(Vector2Int coord) {

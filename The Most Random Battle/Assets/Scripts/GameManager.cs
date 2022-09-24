@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour {
     private int _activePlayerIndex = -1;
 
     public Player[] Players => _players;
+    public Player CurrentPlayer => _activePlayer;
 
     private int _numberOfReadyPlayers = 0;
 
@@ -41,6 +42,8 @@ public class GameManager : MonoBehaviour {
     private List<int> _unavailableColorIndecies = new List<int>();
     public List<int> UnavailableColorIndecies => _unavailableColorIndecies;
     public void SetUnavailableColor(int index) => _unavailableColorIndecies.Add(index);
+
+    public static event Action<Player> NextTurnEvent;
 
     private void Awake() {
         SetUpGame();
@@ -113,7 +116,6 @@ public class GameManager : MonoBehaviour {
         //sets initial camera target
         if (!_isCameraTrackingAllPlayers) {
             foreach (Player player in _players) {
-                Debug.Log(player);
                 if (player.IsControllablePlayer) {
                     SwitchCameraTarget?.Invoke(player);
                     break;
@@ -122,7 +124,7 @@ public class GameManager : MonoBehaviour {
         } else {
             SwitchCameraTarget?.Invoke(_players[0]);
         }
-        
+
         //initiates starting process
         StartCoroutine(DelayRoundStart());
     }
@@ -131,6 +133,7 @@ public class GameManager : MonoBehaviour {
         yield return new WaitForSeconds(1);
 
         _isRoundInProgress = true;
+
         NextTurn();
     }
 
@@ -143,6 +146,8 @@ public class GameManager : MonoBehaviour {
                 SwitchCameraTarget?.Invoke(_activePlayer);
             }
 
+            NextTurnEvent?.Invoke(_activePlayer);
+            
             StartCoroutine(StartNextTurnAfterDelay());
         } else {
             _isRoundInProgress = false;

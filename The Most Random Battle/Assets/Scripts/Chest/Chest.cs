@@ -101,6 +101,12 @@ public class Chest : MonoBehaviour {
         GameObject pickupableObject = Instantiate(pickupablePrefab, GridCreator.instance.gridInformation.cellSize * new Vector3(_coord.x, _coord.y, 0), Quaternion.identity);
         pickupableObject.GetComponent<Pickupable>().SetType(_itemDistribution.RandomFromDistribution());
         pickupableObject.GetComponent<Pickupable>().SetCoord(_coord);
+        
+        if (isWeaponChest) {
+            pickupableObject.AddComponent<Weapon>();
+        } else {
+            pickupableObject.AddComponent<PowerUp>();
+        }
     }
 
     public void SetCoord(Vector2Int coord) {

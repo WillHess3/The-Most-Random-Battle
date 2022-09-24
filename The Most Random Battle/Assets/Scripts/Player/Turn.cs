@@ -29,6 +29,7 @@ public class Turn {
     }
 
     public void MovingComplete() {
+        Debug.Log("moving complete. State: " + _currentTurnState);
         if (_currentTurnState != TurnState.Fleeing) {
             _currentTurnState = TurnState.Interacting;
             _player.Interact();
@@ -47,6 +48,7 @@ public class Turn {
     }
 
     public void ConfirmTurnFinished() {
+        Debug.Log("done with turn");
         _currentTurnState = TurnState.WaitingForTurn;
     }
 
