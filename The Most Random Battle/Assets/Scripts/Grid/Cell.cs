@@ -16,6 +16,11 @@ public class Cell {
     public Player player;
     public Chest chest;
 
+    private SpriteRenderer _spriteRenderer;
+
+    private Color _color;
+    private Color _highlightedColor;
+
     public Cell(Vector2Int coord, Grid grid) {
         _cellState = CellState.Empty;
 
@@ -25,22 +30,27 @@ public class Cell {
         _cellGameObject.transform.parent = grid.Parent;
         _cellGameObject.transform.position = new Vector3(coord.x * CELL_SIZE, coord.y * CELL_SIZE, 0);
 
-        SpriteRenderer spriteRenderer = _cellGameObject.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = grid.CellSprite;
-        spriteRenderer.sortingLayerName = "Grid";
+        _spriteRenderer = _cellGameObject.AddComponent<SpriteRenderer>();
+        _spriteRenderer.sprite = grid.CellSprite;
+        _spriteRenderer.sortingLayerName = "Grid";
 
         if (_coord.y % 2 == 0) {
-            spriteRenderer.color = _coord.x % 2 == 0 ? grid.Color1 : grid.Color2;
+            _color = _coord.x % 2 == 0 ? grid.Color1 : grid.Color2;
         } else {
-            spriteRenderer.color = _coord.x % 2 == 1 ? grid.Color1 : grid.Color2;
+            _color = _coord.x % 2 == 1 ? grid.Color1 : grid.Color2;
         }
 
+        _highlightedColor = _color + Color.green;
+        _spriteRenderer.color = _color;
     }
 
     public void SetCellState(CellState cellState) {
         _cellState = cellState;
     }
 
+    public void HighlightCell(bool isHighlighting) {
+        _spriteRenderer.color = isHighlighting ? _highlightedColor : _color;
+    }
 }
 
 public enum CellState {

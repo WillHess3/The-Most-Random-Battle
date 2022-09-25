@@ -13,6 +13,10 @@ public class ControllablePlayer : Player {
     public static event Action<Player> ReplaceWeaponStart;
     private bool _acceptingReplacementInput;
 
+    private List<Cell> _highlightedCells;
+
+    public static event Action<Vector4> ToggleArrows;
+
     private void Start() {
         _isControllablePlayer = true;
 
@@ -25,13 +29,29 @@ public class ControllablePlayer : Player {
         DieRoller.RollDie += OnDieRolled;
 
         WeaopnPowerUpDisplayer.ReplaceInputRecieved += OnWeaponReplaceButtonPressed;
+
+        _highlightedCells = new List<Cell>();
     }
 
     public override void ChooseDirection() {
         _isGettingDirInput = true;
+        ToggleArrows?.Invoke(new Vector4(1, 1, 1, 1));
     }
 
     private void SetDirection(Vector2Int direction) {
+        Vector4 arrowDir;
+
+        if (direction == Vector2Int.up) {
+            arrowDir = new Vector4(1, 0, 0, 0);
+        } else if (direction == Vector2Int.right) {
+            arrowDir = new Vector4(0, 1, 0, 0);
+        } else if (direction == Vector2Int.down) {
+            arrowDir = new Vector4(0, 0, 1, 0);
+        } else {
+            arrowDir = new Vector4(0, 0, 0, 1);
+        }
+
+        ToggleArrows?.Invoke(arrowDir);
         _direction = direction;
         _isGettingDirInput = false;
         _turn.Move();
@@ -43,6 +63,7 @@ public class ControllablePlayer : Player {
 
     public void OnDieRolled(int rolledNumber) {
         if (_isWaitingOnDiceRoll) {
+            ToggleArrows?.Invoke(Vector4.zero);
             _isWaitingOnDiceRoll = false;
             Move(rolledNumber, _direction);
         }
@@ -50,9 +71,13 @@ public class ControllablePlayer : Player {
 
     public override void Interact() {
         //check if interacting is possible
-        if (IsInteractingPossible((int)_playerWeaponManager.EquipedWeapon.WeaponScriptableObject.attackRadius)) {
+        int attackRadius = (int) _playerWeaponManager.EquipedWeapon.WeaponScriptableObject.attackRadius;
+        if (IsInteractingPossible(attackRadius)) {
             //Get cell to interact with
             _isWaitingOnInteractableTileSelect = true;
+
+            //highlight cells
+            _highlightedCells = HighlightCellsInAttackRadius(attackRadius);
         } else {
             _turn.EndTurn();
         }
@@ -78,6 +103,31 @@ public class ControllablePlayer : Player {
 
         _isStopAtWeapon = false;
         _isCurrentlyStoppedAtWeapon = false;
+    }
+
+    private List<Cell> HighlightCellsInAttackRadius(int radius) {
+        List<Cell> highlightedCells = new List<Cell>();
+
+        for (int y = _coord.y - radius; y <= _coord.y + radius; y++) {
+            for (int x = _coord.x - radius; x <= _coord.x + radius; x++) {
+                if (x < 0 || x > GridCreator.instance.gridInformation.GridLength - 1 || y < 0 || y > GridCreator.instance.gridInformation.GridHeight - 1) {
+                    continue;
+                }
+
+                Cell cell = GridCreator.instance.Grid.GetCellAtCoord(new Vector2Int(x, y));
+
+                if (cell.player == this) {
+                    continue;
+                }
+
+                if ((cell.CellCoord - _coord).sqrMagnitude <= radius * radius) {
+                    highlightedCells.Add(cell);
+                    cell.HighlightCell(true);
+                }
+            }
+        }
+
+        return highlightedCells;
     }
 
     private void Update() {
@@ -109,29 +159,11 @@ public class ControllablePlayer : Player {
                 Cell selectedCell = GridCreator.instance.Grid.GetCellAtCoord(selectedCellCoord);
 
                 if (selectedCell.CellState == CellState.Blocked && _interactableCells.Contains(selectedCell)) {
-                    //find out whats on the cell
-                    /*foreach (Player player in gameManager.Players) {
-                        if (player != this && player.Turn.CurrentTurnState != TurnState.Dead) {
-                            if (player.Coord == selectedCell.CellCoord) {
-                                //interact
-                                Debug.Log("attacked player");
-                                _isWaitingOnInteractableTileSelect = false;
+                    foreach (Cell cell in _highlightedCells) {
+                        cell.HighlightCell(false);
+                    }
 
-                                //flee
-                                _turn.Flee();
-                            }
-                        }
-                    }*/
-
-                    //Get chest to open
-                    /*foreach (Chest chest in gameManager.Chests) {
-                        if (chest.Coord == _interactableCells[0].CellCoord) {
-                            //open chest
-                            chest.OpenChest();
-                            _turn.Flee();
-                            return;
-                        }
-                    }*/
+                    _highlightedCells.Clear();
 
                     if (selectedCell.player != null && selectedCell.player != this) {
                         //interact
@@ -149,6 +181,12 @@ public class ControllablePlayer : Player {
                         _turn.Flee();
                     }
                 } else {
+                    foreach (Cell cell in _highlightedCells) {
+                        cell.HighlightCell(false);
+                    }
+
+                    _highlightedCells.Clear();
+
                     _turn.EndTurn();
                 }
             }

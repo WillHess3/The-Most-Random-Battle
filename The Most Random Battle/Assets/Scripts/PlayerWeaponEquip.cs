@@ -8,7 +8,7 @@ public class PlayerWeaponEquip : MonoBehaviour {
     
     [SerializeField] private GameManager _gameManager;
 
-    private void Start() {
+    private void Awake() {
         _weaopnPowerUpDisplayer = GetComponent<WeaopnPowerUpDisplayer>();
     }
 

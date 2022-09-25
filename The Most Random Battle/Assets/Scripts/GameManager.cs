@@ -45,6 +45,8 @@ public class GameManager : MonoBehaviour {
 
     public static event Action<Player> NextTurnEvent;
 
+    public static event Action StartAndEndControllablePlayerTurn;
+
     private void Awake() {
         SetUpGame();
     }
@@ -145,8 +147,6 @@ public class GameManager : MonoBehaviour {
             if (_isCameraTrackingAllPlayers || (_isCameraTrackingAllPlayers && _activePlayer.IsControllablePlayer)) {
                 SwitchCameraTarget?.Invoke(_activePlayer);
             }
-
-            NextTurnEvent?.Invoke(_activePlayer);
             
             StartCoroutine(StartNextTurnAfterDelay());
         } else {
@@ -160,6 +160,13 @@ public class GameManager : MonoBehaviour {
 
     private IEnumerator StartNextTurnAfterDelay() {
         yield return new WaitForSeconds(1);
+
+        if (_activePlayer.IsControllablePlayer) {
+            StartAndEndControllablePlayerTurn?.Invoke();
+        }
+
+        NextTurnEvent?.Invoke(_activePlayer);
+
         _activePlayer.Turn.StartTurn();
     }
 
@@ -167,6 +174,10 @@ public class GameManager : MonoBehaviour {
         if (_isRoundInProgress) {
             if (_activePlayer.Turn.CurrentTurnState == TurnState.Done) {
                 _activePlayer.Turn.ConfirmTurnFinished();
+
+                if (_activePlayer.IsControllablePlayer) {
+                    StartAndEndControllablePlayerTurn?.Invoke();
+                }
 
                 NextTurn();
             }
