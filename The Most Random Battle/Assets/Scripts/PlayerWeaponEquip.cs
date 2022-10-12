@@ -43,7 +43,10 @@ public class PlayerWeaponEquip : MonoBehaviour {
         }
 
         //change player sprite
-        _gameManager.CurrentPlayer.GetComponent<SpriteRenderer>().sprite = _gameManager.CurrentPlayer.PlayerWeaponManager.EquipedWeapon.WeaponScriptableObject.playerSprite;
+        ChangePlayerSprite(_gameManager.CurrentPlayer);
+    }
 
+    public static void ChangePlayerSprite(Player player) {
+        player.GetComponent<SpriteRenderer>().sprite = player.PlayerWeaponManager.EquipedWeapon.WeaponScriptableObject.playerSprite;
     }
 }

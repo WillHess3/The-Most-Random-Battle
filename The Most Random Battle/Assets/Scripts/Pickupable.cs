@@ -24,6 +24,9 @@ public class Pickupable : MonoBehaviour {
 
     public WeaponsList weaponsList;
 
+    private bool _isShowingOnGround;
+    public bool IsShowingOnGround;
+
     private void Awake() {
         _spriteRenderer = GetComponent<SpriteRenderer>();
 

@@ -34,7 +34,23 @@ public class Weapon : MonoBehaviour {
     }
 
     public int WeaponScore() {
-        return 0;
+        int score = 0;
+
+        if (_pickupable.PickupableType == PickupableTypeEnum.Knife) {
+            score += 1;
+        } else if (_pickupable.PickupableType == PickupableTypeEnum.Spear) {
+            score += 5;
+        } else if (_pickupable.PickupableType == PickupableTypeEnum.Chainsaw || _pickupable.PickupableType == PickupableTypeEnum.Machette || _pickupable.PickupableType == PickupableTypeEnum.Hammer) {
+            score += 10;
+        } else if (_pickupable.PickupableType == PickupableTypeEnum.Pistol || _pickupable.PickupableType == PickupableTypeEnum.Shotgun || _pickupable.PickupableType == PickupableTypeEnum.SMG) {
+            score += 15;
+        } else {
+            score += 20;
+        }
+
+        score -= (int)((1 - (_durability / (float)_weaponScriptableObject.durability)) * 15);
+
+        return score;
     }
 
     private void OnWeaponPickedUp(Player player, GameObject weapon, int inventoryIndex) {

@@ -17,6 +17,8 @@ public class Chest : MonoBehaviour {
     
     private Distribution<PickupableTypeEnum> _itemDistribution;
 
+    private float _averageWeaponScore;
+    public float AverageWeaponScore => _averageWeaponScore;
 
     private void Start() {
         PickCoord();
@@ -51,6 +53,12 @@ public class Chest : MonoBehaviour {
 
             _items.Add(PickupableTypeEnum.HomingPistol);
             _distributionProportions.Add(0.112f);
+
+            //values hard coded in from weapon class regarding the weapon score
+            _averageWeaponScore = (_distributionProportions[3] * 5)
+                                  + (10 * (_distributionProportions[0] + _distributionProportions[1] + _distributionProportions[2]))
+                                  + (15 * (_distributionProportions[4] + _distributionProportions[5] + _distributionProportions[7]))
+                                  + (20 * (_distributionProportions[6] + _distributionProportions[8]));
         } else {
             _items.Add(PickupableTypeEnum.Heart);
             _distributionProportions.Add(0.17f);
@@ -107,6 +115,8 @@ public class Chest : MonoBehaviour {
         } else {
             pickupableObject.AddComponent<PowerUp>();
         }
+
+        gameManager.Pickupables.Add(pickupableObject.GetComponent<Pickupable>());
     }
 
     public void SetCoord(Vector2Int coord) {

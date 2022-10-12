@@ -17,6 +17,9 @@ public class ControllablePlayer : Player {
 
     public static event Action<Vector4> ToggleArrows;
 
+    private bool _isWaitingOnLimbTarget;
+    public static event Action<Vector4> ToggleAttackButtons;
+
     private void Start() {
         _isControllablePlayer = true;
 
@@ -31,6 +34,8 @@ public class ControllablePlayer : Player {
         WeaopnPowerUpDisplayer.ReplaceInputRecieved += OnWeaponReplaceButtonPressed;
 
         _highlightedCells = new List<Cell>();
+
+        LimbTargetingInput.LimbSelected += OnLimbSelected;
     }
 
     public override void ChooseDirection() {
@@ -130,6 +135,16 @@ public class ControllablePlayer : Player {
         return highlightedCells;
     }
 
+    private void OnLimbSelected(Limbs limb) {
+        if (_turn.CurrentTurnState == TurnState.WaitingForTurn || !_isWaitingOnLimbTarget) {
+            return;
+        }
+
+        Debug.Log(limb);
+        _playerWeaponManager.Attack(_playerWeAreAttacking, limb);
+        _turn.Flee();
+    }
+
     private void Update() {
         if (_isGettingDirInput) {
             if (Input.GetKeyDown(KeyCode.W)) {
@@ -166,12 +181,20 @@ public class ControllablePlayer : Player {
                     _highlightedCells.Clear();
 
                     if (selectedCell.player != null && selectedCell.player != this) {
-                        //interact
-                        Debug.Log("attacked player");
-                        _isWaitingOnInteractableTileSelect = false;
+                        //set the player
+                        _playerWeAreAttacking = selectedCell.player;
 
-                        //flee
-                        _turn.Flee();
+                        //get attack weapon hit chances
+                        _playerWeaponManager.EquipedWeapon.GenerateHitChances(selectedCellCoord);
+
+                        //interact by getting limb
+                        Weapon weapon = _playerWeaponManager.EquipedWeapon;
+                        Vector4 weaopnPercents = new Vector4(weapon.WeaponHitChances.headHitChance, weapon.WeaponHitChances.chestHitChance, weapon.WeaponHitChances.armsHitChance, weapon.WeaponHitChances.legsHitChance);
+                        
+                        _isWaitingOnLimbTarget = true;
+                        ToggleAttackButtons?.Invoke(weaopnPercents);
+
+                        _isWaitingOnInteractableTileSelect = false;
                     } else if (selectedCell.chest != null) {
                         //open chest
                         selectedCell.chest.OpenChest();
@@ -191,10 +214,22 @@ public class ControllablePlayer : Player {
                 }
             }
         }
+
+        //decrease flash red timer
+        if (_flashRedTimer > 0) {
+            _flashRedTimer -= 2 * Time.deltaTime;
+            _spriteRenderer.material.SetFloat("_RedAmount", _flashRedTimer);
+        } else {
+            if (_flashRedTimer != 0) {
+                _flashRedTimer = 0;
+                _spriteRenderer.material.SetFloat("_RedAmount", _flashRedTimer);
+            }
+        }
     }
 
     private void OnDestroy() {
         DieRoller.RollDie -= OnDieRolled;
         WeaopnPowerUpDisplayer.ReplaceInputRecieved -= OnWeaponReplaceButtonPressed;
+        LimbTargetingInput.LimbSelected -= OnLimbSelected;
     }
 }

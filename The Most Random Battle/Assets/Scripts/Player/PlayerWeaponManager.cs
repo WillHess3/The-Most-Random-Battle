@@ -32,14 +32,13 @@ public class PlayerWeaponManager {
         _inventory[inventorySpot] = null;
     }
 
-    //Attack
     public void Attack(Player target, Limbs targetedLimb) {
         float randomHitChance = Random.value;
         bool isHit = false;
 
         switch (targetedLimb) {
             case Limbs.Chest:
-                if (randomHitChance >= _equipedWeapon.WeaponHitChances.chestHitChance) {
+                if (randomHitChance <= _equipedWeapon.WeaponHitChances.chestHitChance) {
                     target.TakeDamage(_equipedWeapon.WeaponScriptableObject.damage);
                     isHit = true;
                 }
@@ -47,7 +46,7 @@ public class PlayerWeaponManager {
                 break;
 
             case Limbs.Head:
-                if (randomHitChance >= _equipedWeapon.WeaponHitChances.headHitChance) {
+                if (randomHitChance <= _equipedWeapon.WeaponHitChances.headHitChance) {
                     target.TakeDamage(3);
                     isHit = true;
                 }
@@ -55,7 +54,7 @@ public class PlayerWeaponManager {
                 break;
 
             case Limbs.Arms:
-                if (randomHitChance >= _equipedWeapon.WeaponHitChances.armsHitChance) {
+                if (randomHitChance <= _equipedWeapon.WeaponHitChances.armsHitChance) {
                     target.CrippleLimb(true);
 
                     if (Random.value < .5f) {
@@ -68,7 +67,7 @@ public class PlayerWeaponManager {
                 break;
 
             case Limbs.Legs:
-                if (randomHitChance >= _equipedWeapon.WeaponHitChances.legsHitChance) {
+                if (randomHitChance <= _equipedWeapon.WeaponHitChances.legsHitChance) {
                     target.CrippleLimb(false);
 
                     if (Random.value < .5f) {

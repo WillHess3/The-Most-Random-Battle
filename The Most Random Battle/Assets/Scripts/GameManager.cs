@@ -26,6 +26,9 @@ public class GameManager : MonoBehaviour {
     private List<Chest> _chests;
     public List<Chest> Chests => _chests;
 
+    private List<Pickupable> _pickupables;
+    public List<Pickupable> Pickupables => _pickupables;
+
     private bool _isRoundInProgress;
 
     [Header("Prefabs")]
@@ -81,6 +84,9 @@ public class GameManager : MonoBehaviour {
         }
 
         ShufflePlayerArray();
+
+        //sets up pickupables list
+        _pickupables = new List<Pickupable>();
     }
 
     private void MakeChest(GameObject prefab, bool isWeaponChest) {

@@ -42,6 +42,10 @@ public abstract class Player : MonoBehaviour {
     protected bool _isArmsCrippled;
     protected bool _isLegsCrippled;
 
+    public int Health => _health;
+    public bool IsArmsCrippled => _isArmsCrippled;
+    public bool IsLegsCrippled => _isLegsCrippled;
+
     protected SpriteRenderer _spriteRenderer;
 
     public static Action<Player, GameObject, int> PickedUpWeapon;
@@ -53,6 +57,9 @@ public abstract class Player : MonoBehaviour {
     private Vector2Int _pickupableCellCoord;
     protected bool _isStopAtWeapon;
     protected bool _isCurrentlyStoppedAtWeapon;
+
+    protected float _flashRedTimer;
+    protected Player _playerWeAreAttacking;
 
     protected void Spawn() {
         _startingKnifeWeapon = Instantiate(startingKnifePrefab).GetComponent<Weapon>();
@@ -284,7 +291,11 @@ public abstract class Player : MonoBehaviour {
     public abstract void ReplaceWeapon();
 
     public void TakeDamage(int damage) {
+        //subtract health
         _health -= damage;
+
+        //flash red
+        _flashRedTimer = 1;
     }
 
     public void CrippleLimb(bool isCripplingArms) {

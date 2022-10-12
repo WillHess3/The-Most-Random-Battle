@@ -15,6 +15,7 @@ MonoBehaviour:
   weaponSprite: {fileID: 1842111411, guid: d00c45b576623874a9cdd7c46b33cb98, type: 3}
   playerSprite: {fileID: -972693776, guid: d00c45b576623874a9cdd7c46b33cb98, type: 3}
   playerXOffset: 0
+  isMelee: 1
   attackRadius: 1
   damage: 1
   chestMeanHitChance: 1

@@ -41,6 +41,9 @@ TagManager:
   - name: Grid
     uniqueID: 1147314315
     locked: 0
+  - name: Arrows
+    uniqueID: 2507236573
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
