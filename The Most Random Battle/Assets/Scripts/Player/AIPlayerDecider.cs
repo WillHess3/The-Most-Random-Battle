@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class AIPlayerDecider {
 
-    private AIDifficultyLevel _aiDifficultyLevel;
+    private readonly AIDifficultyLevel _aiDifficultyLevel;
 
-    private Player _player;
+    private readonly Player _player;
 
     public AIPlayerDecider(AIDifficultyLevel aiDifficultyLevel, Player player) {
         _aiDifficultyLevel = aiDifficultyLevel;
@@ -1347,6 +1347,136 @@ public class AIPlayerDecider {
             //target chest
             return 1;
         }
+    }
+
+    public Cell ChooseInteractCell(List<Cell> interactableCells) {
+        Cell interactCell = null;
+
+        switch (_aiDifficultyLevel) {
+            case AIDifficultyLevel.Random:
+                interactCell = ChooseRandomCell(interactableCells);
+                break;
+
+            case AIDifficultyLevel.Easy:
+                interactCell = ChooseBothEasyChallengCell(interactableCells);
+                break;
+
+            case AIDifficultyLevel.Challenge:
+                interactCell = ChooseBothEasyChallengCell(interactableCells);
+                break;
+        }
+
+        return interactCell;
+    }
+
+    private Cell ChooseRandomCell(List<Cell> interactableCells) {
+        //chooses randomly from all blocked cells
+        List<Cell> blockedCells = new List<Cell>();
+        foreach (Cell cell in interactableCells) {
+            if (cell.CellState == CellState.Blocked) {
+                blockedCells.Add(cell);
+            }
+        }
+
+        int randCellIndex = Mathf.FloorToInt(blockedCells.Count * Random.value);
+
+        if (blockedCells.Count > 0) {
+            return blockedCells[randCellIndex];
+        }
+
+        randCellIndex = Mathf.FloorToInt(interactableCells.Count * Random.value);
+        return interactableCells[randCellIndex];
+    }
+
+    private Cell ChooseBothEasyChallengCell(List<Cell> interactableCells) {
+        //get all possible chests and players to interact with
+        List<Cell> interactableChests = new List<Cell>();
+        List<Cell> interactablePlayers = new List<Cell>();
+
+        foreach (Cell cell in interactableCells) {
+            if (cell.CellState != CellState.Blocked) {
+                continue;
+            }
+
+            if (cell.player != null) {
+                if (cell.player == _player) {
+                    continue;
+                }
+
+                interactablePlayers.Add(cell);
+            } else if (cell.chest != null) {
+                if ((cell.CellCoord - _player.Coord).sqrMagnitude > 1) {
+                    continue;
+                }
+
+                interactableChests.Add(cell);
+            }
+        }
+
+        //determine needs
+        bool isNeedHealth = _player.Health < 3 || _player.IsArmsCrippled || _player.IsLegsCrippled;
+        bool isNeedWeapon = !(_player.PlayerWeaponManager.Inventory[1] == null || (_player.PlayerWeaponManager.Inventory[0].WeaponScriptableObject.isMelee && _player.PlayerWeaponManager.Inventory[1].WeaponScriptableObject.isMelee));
+
+        //pick one
+        Cell returnCell = null;
+
+        //chests
+        bool isPowerUpChestThere = false;
+        foreach (Cell chestCell in interactableChests) {
+            if (!chestCell.chest.isWeaponChest) {
+                isPowerUpChestThere = true;
+                returnCell = chestCell;
+                break;
+            }
+        }
+
+        if (isNeedHealth) {
+            if (isPowerUpChestThere) {
+                return returnCell;
+            }
+        }
+
+        bool isWeaponChestThere = false;
+        foreach (Cell chestCell in interactableChests) {
+            if (chestCell.chest.isWeaponChest) {
+                isWeaponChestThere = true;
+                returnCell = chestCell;
+                break;
+            }
+        }
+
+        if (isNeedWeapon) {
+            if (isWeaponChestThere) {
+                return returnCell;
+            }
+        }
+
+        //players
+        if (interactablePlayers.Count == 0) {
+            returnCell = interactableChests[0];
+        } else {
+            if (_aiDifficultyLevel == AIDifficultyLevel.Easy) {
+                //choose a random cell
+                returnCell = interactablePlayers[Mathf.FloorToInt(interactablePlayers.Count * Random.value)];
+            } else {
+                //choose closest cell
+                Cell closestCell = null;
+                float closestSquaredDist = float.MaxValue;
+                foreach (Cell playerCell in interactablePlayers) {
+                    float squaredDist = (playerCell.CellCoord - _player.Coord).sqrMagnitude;
+                    if (squaredDist < closestSquaredDist) {
+                        closestSquaredDist = squaredDist;
+                        closestCell = playerCell;
+                    }
+                }
+
+                returnCell = closestCell;
+            }
+        }
+
+        
+
+        return returnCell;
     }
 }
 

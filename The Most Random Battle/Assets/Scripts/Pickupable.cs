@@ -8,7 +8,6 @@ public class Pickupable : MonoBehaviour {
     private readonly Dictionary<PickupableTypeEnum, Sprite> _pickupableSpritesDictionary = new Dictionary<PickupableTypeEnum, Sprite>();
 
     public List<Sprite> Sprites => _sprites;
-    public Dictionary<PickupableTypeEnum, Sprite> PickupableSpritesDictionary => _pickupableSpritesDictionary;
 
     private SpriteRenderer _spriteRenderer;
 
@@ -23,9 +22,6 @@ public class Pickupable : MonoBehaviour {
     public bool IsWeapon => _isWeapon;
 
     public WeaponsList weaponsList;
-
-    private bool _isShowingOnGround;
-    public bool IsShowingOnGround;
 
     private void Awake() {
         _spriteRenderer = GetComponent<SpriteRenderer>();

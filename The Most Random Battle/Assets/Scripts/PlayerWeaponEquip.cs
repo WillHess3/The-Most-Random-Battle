@@ -29,9 +29,7 @@ public class PlayerWeaponEquip : MonoBehaviour {
         }
 
         //change inventory equip if necessary
-        if (_gameManager.CurrentPlayer.PlayerWeaponManager.EquipedWeapon != _gameManager.CurrentPlayer.PlayerWeaponManager.Inventory[weaponIndex]) {
-            _gameManager.CurrentPlayer.PlayerWeaponManager.Equip(weaponIndex);
-        }
+        ChangeInventoryEquipedWeapon(weaponIndex);
 
         //highlight green
         if (weaponIndex == 0) {
@@ -44,6 +42,12 @@ public class PlayerWeaponEquip : MonoBehaviour {
 
         //change player sprite
         ChangePlayerSprite(_gameManager.CurrentPlayer);
+    }
+
+    public void ChangeInventoryEquipedWeapon(int weaponIndex) {
+        if (_gameManager.CurrentPlayer.PlayerWeaponManager.EquipedWeapon != _gameManager.CurrentPlayer.PlayerWeaponManager.Inventory[weaponIndex]) {
+            _gameManager.CurrentPlayer.PlayerWeaponManager.Equip(weaponIndex);
+        }
     }
 
     public static void ChangePlayerSprite(Player player) {

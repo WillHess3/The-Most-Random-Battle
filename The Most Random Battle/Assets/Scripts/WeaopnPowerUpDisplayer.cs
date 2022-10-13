@@ -46,6 +46,8 @@ public class WeaopnPowerUpDisplayer : MonoBehaviour {
             _player = currentPlayer;
             DisplayInventoryItems(currentPlayer.PlayerWeaponManager.Inventory[0], currentPlayer.PlayerWeaponManager.Inventory[1], null);
             _playerWeaponEquip.HighlightEquipedWeapon(currentPlayer.PlayerWeaponManager.Inventory[0] == currentPlayer.PlayerWeaponManager.EquipedWeapon ? 0 : 1);
+        } else {
+            PlayerWeaponEquip.ChangePlayerSprite(currentPlayer);
         }
     }
 

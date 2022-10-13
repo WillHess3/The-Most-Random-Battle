@@ -62,6 +62,8 @@ public abstract class Player : MonoBehaviour {
     protected Player _playerWeAreAttacking;
 
     protected void Spawn() {
+        _health = 3;
+
         _startingKnifeWeapon = Instantiate(startingKnifePrefab).GetComponent<Weapon>();
         
         _playerWeaponManager = new PlayerWeaponManager(this);
@@ -168,8 +170,6 @@ public abstract class Player : MonoBehaviour {
                         //Pick up weapon
                         _isReadyToPickUpWeapon = true;
                         _inventorySpot = inventorySpot;
-
-                        PickedUpWeapon?.Invoke(this, _pickupableObject.gameObject, _inventorySpot);
                     } else {
                         //replace weapon
                         _isStopAtWeapon = true;
@@ -213,19 +213,20 @@ public abstract class Player : MonoBehaviour {
                 if (_isReadyToPickUpWeapon) {
                     if (new Vector2Int(Mathf.FloorToInt((transform.position.x + 1) / 2f), Mathf.FloorToInt((transform.position.y + 1) / 2f)) == _pickupableCellCoord){
                         _isReadyToPickUpWeapon = false;
+                        PickedUpWeapon?.Invoke(this, _pickupableObject.gameObject, _inventorySpot);
                         PickedUpWeaponVisualEvent?.Invoke(this);
                     }
                 }
             } else {
                 if (!_isCurrentlyStoppedAtWeapon) {
-                    Vector2Int coord = new Vector2Int(Mathf.FloorToInt((transform.position.x + 1) / 2f), Mathf.FloorToInt((transform.position.y + 1) / 2f));
+                    Vector2Int coordVisualPlayerIsOn = new Vector2Int(Mathf.FloorToInt((transform.position.x + 1) / 2f), Mathf.FloorToInt((transform.position.y + 1) / 2f));
 
-                    if (coord != _pickupableCellCoord) {
+                    if (coordVisualPlayerIsOn != _pickupableCellCoord) {
                         _moveTimer -= Time.deltaTime;
                         transform.position = Vector3.Lerp(_moveFromPosition, _targetPosititon, movementInterpolationCurve.Evaluate(1 - _moveTimer / 0.5f));
                     } else {
-                        ReplaceWeapon();
                         _isCurrentlyStoppedAtWeapon = true;
+                        ReplaceWeapon();
                     }
                 }
             }
@@ -239,22 +240,6 @@ public abstract class Player : MonoBehaviour {
 
     protected bool IsInteractingPossible(int radius) {
         _interactableCells.Clear();
-
-        /*foreach (Player player in gameManager.Players) {
-            if (player == this) {
-                continue;
-            }
-
-            if (Mathf.Pow(player.Coord.x - _coord.x, 2) + Mathf.Pow(player.Coord.y - _coord.y, 2) <= range * range) {
-                _interactableCells.Add(GridCreator.instance.Grid.GetCellAtCoord(player.Coord));
-            }
-        }
-
-        foreach (Chest chest in gameManager.Chests) {
-            if ((chest.Coord - _coord).sqrMagnitude == 1) {
-                _interactableCells.Add(GridCreator.instance.Grid.GetCellAtCoord(chest.Coord));
-            }
-        }*/
 
         for (int y = _coord.y - radius; y <= _coord.y + radius; y++) {
             for (int x = _coord.x - radius; x <= _coord.x + radius; x++) {
@@ -304,6 +289,8 @@ public abstract class Player : MonoBehaviour {
         } else {
             _isLegsCrippled = true;
         }
+
+        _flashRedTimer = 0.5f;
     }
 
 

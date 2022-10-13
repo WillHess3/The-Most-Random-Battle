@@ -39,7 +39,7 @@ public class AIPlayer : Player {
         //check if interacting is possible
         if (IsInteractingPossible((int)_playerWeaponManager.EquipedWeapon.WeaponScriptableObject.attackRadius)) {
             //pick which cell to interact with
-            Cell selectedCell = _interactableCells[0];
+            Cell selectedCell = _aiPlayerDecider.ChooseInteractCell(_interactableCells);
 
             if (selectedCell.player != null && selectedCell.player != this) {
                 //set the player
@@ -94,7 +94,27 @@ public class AIPlayer : Player {
     }
 
     public override void ReplaceWeapon() {
-        throw new System.NotImplementedException();
+        //pick worst weapon
+        float weapon0Score = _playerWeaponManager.Inventory[0].WeaponScore();
+        float weapon1Score = _playerWeaponManager.Inventory[1].WeaponScore();
+
+        Weapon dropWeapon = weapon0Score < weapon1Score ? _playerWeaponManager.Inventory[0] : _playerWeaponManager.Inventory[1];
+
+        //drop worst weapon
+        int replaceIndex = weapon0Score < weapon1Score ? 0 : 1;
+
+        dropWeapon.Drop(_pickupableObject.Coord);
+
+        //pick up new weapon
+        PickedUpWeapon?.Invoke(this, _pickupableObject.gameObject, replaceIndex);
+
+        //equip new weapon
+        _playerWeaponManager.Equip(replaceIndex);
+        PlayerWeaponEquip.ChangePlayerSprite(this);
+
+        //continue
+        _isStopAtWeapon = false;
+        _isCurrentlyStoppedAtWeapon = false;
     }
 
     private void Update() {

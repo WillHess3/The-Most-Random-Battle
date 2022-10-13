@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Weapon : MonoBehaviour {
@@ -86,9 +84,10 @@ public class Weapon : MonoBehaviour {
             }
 
             Vector2Int offsetVector = new Vector2Int(xOffset, yOffset);
-            Debug.Log(offsetVector);
-            if (GridCreator.instance.Grid.GetCellAtCoord(coord + offsetVector) != null) {
-                if (GridCreator.instance.Grid.GetCellAtCoord(coord + offsetVector).CellState != CellState.Empty) {
+
+            Vector2Int offsetCoord = new Vector2Int(Mathf.Clamp(xOffset + coord.x, 0, GridCreator.instance.gridInformation.GridLength - 1), Mathf.Clamp(yOffset + coord.y, 0, GridCreator.instance.gridInformation.GridHeight - 1));
+            if (GridCreator.instance.Grid.GetCellAtCoord(offsetCoord) != null) {
+                if (GridCreator.instance.Grid.GetCellAtCoord(offsetCoord).CellState != CellState.Empty) {
                     PickDropCoord(depth - 1);
                 } else {
                     coord += offsetVector;

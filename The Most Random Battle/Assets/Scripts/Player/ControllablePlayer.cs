@@ -104,6 +104,7 @@ public class ControllablePlayer : Player {
 
         _playerWeaponManager.Inventory[replaceIndex].Drop(_pickupableObject.Coord);
         PickedUpWeapon?.Invoke(this, _pickupableObject.gameObject, replaceIndex);
+        
         PickedUpWeaponVisualEvent?.Invoke(this);
 
         _isStopAtWeapon = false;

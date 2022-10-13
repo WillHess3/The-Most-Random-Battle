@@ -26,6 +26,7 @@ public class PlayerWeaponManager {
 
     public void PickUpWeapon(Weapon weapon, int inventorySpot) {
         _inventory[inventorySpot] = weapon;
+        Equip(inventorySpot);
     }
 
     public void DropWeapon(int inventorySpot) {
