@@ -10,6 +10,7 @@ public class Weapon : MonoBehaviour {
     public Weapons WeaponScriptableObject => _weaponScriptableObject;
 
     private int _durability;
+    public int Durability => _durability;
 
     public struct HitChances {
         public float headHitChance;
@@ -132,6 +133,37 @@ public class Weapon : MonoBehaviour {
 
     public void TakeWeaponDamage() {
         _durability--;
+
+        if (_durability <= 0) {
+            Break();
+        }
+    }
+
+    private void Break() {
+        //set inventory spot equal to null
+        if (_player.PlayerWeaponManager.Inventory[0] == this) {
+            _player.PlayerWeaponManager.Inventory[0] = null;
+
+            if (_player.PlayerWeaponManager.Inventory[1] != null) {
+                _player.PlayerWeaponManager.Equip(1);
+            }
+        } else if (_player.PlayerWeaponManager.Inventory[1] == this) {
+            _player.PlayerWeaponManager.Inventory[1] = null;
+
+            if (_player.PlayerWeaponManager.Inventory[0] != null) {
+                _player.PlayerWeaponManager.Equip(0);
+            }
+        }
+
+        //destroy the game object
+        _player.gameManager.Pickupables.Remove(GetComponent<Pickupable>());
+        Player.PickedUpWeaponVisualEvent?.Invoke(_player);
+
+        if (_player.gameManager.Pickupables.Contains(GetComponent<Pickupable>())) {
+            Break();
+        } else {
+            Destroy(gameObject);
+        }
     }
 
     private void OnDestroy() {

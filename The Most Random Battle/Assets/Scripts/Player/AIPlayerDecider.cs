@@ -190,7 +190,17 @@ public class AIPlayerDecider {
 
         //figure out how we're doing
         bool isGoodOnWellness = !(_player.IsArmsCrippled || _player.IsLegsCrippled || _player.Health == 1);
-        bool isGoodOnWeapons = !(_player.PlayerWeaponManager.Inventory[1] == null || (_player.PlayerWeaponManager.Inventory[0].WeaponScriptableObject.isMelee && _player.PlayerWeaponManager.Inventory[1].WeaponScriptableObject.isMelee));
+        bool isGoodOnWeapons;
+        if (_player.PlayerWeaponManager.Inventory[0] == null || _player.PlayerWeaponManager.Inventory[1] == null) {
+            isGoodOnWeapons = false;
+        } else {
+            if (_player.PlayerWeaponManager.Inventory[0].WeaponScriptableObject.isMelee && _player.PlayerWeaponManager.Inventory[1].WeaponScriptableObject.isMelee) {
+                isGoodOnWeapons = false;
+            } else {
+                isGoodOnWeapons = true;
+            }
+        }
+        
         bool isGoodOnPowerUps = true;
 
         if (isFleeing && isFleeingBecausePlayer) {
